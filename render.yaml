@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: office-assistant
+    name: officeassistant
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
