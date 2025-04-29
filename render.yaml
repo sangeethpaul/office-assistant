@@ -1,13 +1,9 @@
 services:
   - type: web
-    name: officeassistant
+    name: office-assistant
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: GEMINI_API_KEY
-        value: ${GEMINI_API_KEY}
-      - key: SECRET_KEY
-        generateValue: true
-      - key: PYTHON_VERSION
-        value: 3.9.13
+      - key: FLASK_ENV
+        value: production
