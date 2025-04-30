@@ -3,122 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Office Assistant</title>
+    <title>Office Knowledge Assistant</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         .container { display: flex; flex-direction: column; gap: 20px; }
         .section { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
         button { padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background: #45a049; }
-        textarea, input { width: 100%; padding: 8px; margin: 8px 0; }
-        .response { background: #f9f9f9; padding: 10px; border-radius: 4px; min-height: 50px; }
-        .error { color: red; }
+        textarea { width: 100%; padding: 8px; min-height: 100px; }
+        .response { background: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 10px; }
+        .error { color: #d32f2f; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Office Assistant</h1>
+        <h1>Office Knowledge Assistant</h1>
 
-        <!-- Login Section -->
-        <div class="section">
-            <h2>Login</h2>
-            <input type="email" id="email" placeholder="Email" value="hr@company.com">
-            <input type="password" id="password" placeholder="Password" value="yourpassword">
-            <button onclick="login()">Login</button>
-            <div id="token-display" class="response"></div>
-        </div>
-
-        <!-- Ask Question Section -->
         <div class="section">
             <h2>Ask a Question</h2>
-            <textarea id="question" placeholder="What is our vacation policy??"></textarea>
+            <textarea id="question" placeholder="What is our vacation policy?"></textarea>
             <button onclick="askQuestion()">Submit</button>
             <div id="answer" class="response"></div>
-        </div>
-
-        <!-- Health Check -->
-        <div class="section">
-            <h2>System Status</h2>
-            <button onclick="checkHealth()">Check Health</button>
-            <div id="health-status" class="response"></div>
         </div>
     </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:5000'; // Change to your Render URL when deployed
-        let authToken = '';
+        const API_BASE_URL = 'http://localhost:5000'; // Change for production
 
-        // Login function
-        async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-                if (response.ok) {
-                    authToken = data.token;
-                    document.getElementById('token-display').innerHTML =
-                        `<strong>Logged in:</strong> ${email}`;
-                } else {
-                    document.getElementById('token-display').innerHTML =
-                        `<span class="error">Error: ${data.error || 'Login failed'}</span>`;
-                }
-            } catch (error) {
-                document.getElementById('token-display').innerHTML =
-                    `<span class="error">Connection error: ${error.message}</span>`;
-            }
-        }
-
-        // Ask question function
         async function askQuestion() {
-            if (!authToken) {
-                document.getElementById('answer').innerHTML =
-                    '<span class="error">Please login first</span>';
+            const question = document.getElementById('question').value.trim();
+            const answerDiv = document.getElementById('answer');
+
+            if (!question) {
+                answerDiv.innerHTML = '<span class="error">Please enter a question</span>';
                 return;
             }
 
-            const question = document.getElementById('question').value;
+            answerDiv.innerHTML = 'Searching for answer...';
 
             try {
                 const response = await fetch(`${API_BASE_URL}/ask`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query: question })
                 });
 
                 const data = await response.json();
+
                 if (response.ok) {
-                    document.getElementById('answer').innerHTML =
-                        `<strong>Response:</strong> ${data.response}`;
+                    answerDiv.innerHTML = data.response.replace(/\n/g, '<br>');
                 } else {
-                    document.getElementById('answer').innerHTML =
-                        `<span class="error">Error: ${data.error || 'Request failed'}</span>`;
+                    answerDiv.innerHTML = `<span class="error">${data.error || 'Request failed'}</span>`;
                 }
             } catch (error) {
-                document.getElementById('answer').innerHTML =
-                    `<span class="error">Connection error: ${error.message}</span>`;
-            }
-        }
-
-        // Health check function
-        async function checkHealth() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/health`);
-                const data = await response.json();
-                document.getElementById('health-status').innerHTML =
-                    `<strong>Status:</strong> ${data.status}`;
-            } catch (error) {
-                document.getElementById('health-status').innerHTML =
-                    `<span class="error">Connection error: ${error.message}</span>`;
+                answerDiv.innerHTML = `<span class="error">Connection error: ${error.message}</span>`;
+                console.error('Error:', error);
             }
         }
     </script>
