@@ -1,7 +1,7 @@
 {
   "users": [
     {
-      "email": "spaul@groupon.com",
+      "email": "hr@company.com",
       "password_hash": "123",  # Use bcrypt to hash
       "department": "hr",
       "access": ["hr_policies.md"]
